@@ -7,5 +7,12 @@ class News(models.Model):
     url = models.CharField(verbose_name="路由", max_length=100)
     create_time = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
+<<<<<<< HEAD
 class User(models.Model):
     mobile = models.CharField(verbose_name="电话号码",max_length=11)
+=======
+
+class User(models.Model):
+    pass
+
+>>>>>>> 3f583509ce335df8693823842a1b8c3bb6a15519
