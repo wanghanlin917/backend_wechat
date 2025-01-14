@@ -2,6 +2,7 @@ from api.models import User
 from utils.viewset import GenericViewSet, ModelViewSet
 from rest_framework import serializers
 from rest_framework.response import Response
+from django.core.validators import RegexValidator
 from utils.SendSMS import SendSMS
 
 
@@ -10,7 +11,7 @@ class LoginSerializers(serializers.ModelSerializer):
         model = User
         fields =['mobile']
         extra_kwargs = {
-            "mobile": '[RegexValidator(r"\d{11}", message="格式错误")]'
+            "mobile": [RegexValidator(r"\d{11}", message="格式错误")]
         }
     def validate_mobile(self, value):
         print("dddd",value)
