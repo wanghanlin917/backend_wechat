@@ -3,22 +3,25 @@ from utils.viewset import GenericViewSet, ModelViewSet
 from rest_framework import serializers
 from rest_framework.response import Response
 from django.core.validators import RegexValidator
+import re
 from utils.SendSMS import SendSMS
 
 
 class LoginSerializers(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields =['mobile']
+        fields = ['mobile']
         extra_kwargs = {
-            "mobile": [RegexValidator(r"\d{11}", message="格式错误")]
+            "mobile": {
+                'validators': [
+                    RegexValidator(
+                        regex=r'^1[3-9]\d{9}$',
+                        message='请输入有效的手机号',
+                        code='-1'
+                    )
+                ]
+            }
         }
-    def validate_mobile(self, value):
-        print("dddd",value)
-        # queryset = User.objects.filter(mobile=value)
-        # if not queryset.exists():
-        #     pass
-
 
 
 class LoginView(ModelViewSet):
@@ -26,6 +29,8 @@ class LoginView(ModelViewSet):
     serializer_class = LoginSerializers
 
     def list(self, request, *args, **kwargs):
+        print(request.query_params.get('mobile'))
+
         queryset = self.filter_queryset(self.get_queryset())
         print(queryset)
         page = self.paginate_queryset(queryset)
