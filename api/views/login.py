@@ -4,7 +4,7 @@ from rest_framework import exceptions
 
 from django.core.validators import RegexValidator
 from django_redis import get_redis_connection
-from api.models import User
+from api import models
 import random
 
 from utils.viewset import GenericViewSet, ModelViewSet
@@ -15,8 +15,8 @@ from utils.SendSMS import SendSMS
 
 class SmsCodeSerializers(serializers.ModelSerializer):
     class Meta:
-        model = User
-        fields = ['mobile',]
+        model = models.User
+        fields = ['mobile', ]
         extra_kwargs = {
             "mobile": {
                 'validators': [
@@ -31,7 +31,7 @@ class SmsCodeSerializers(serializers.ModelSerializer):
 
 
 class SmsCodeView(ModelViewSet):
-    queryset = User.objects.all()
+    queryset = models.User.objects.all()
     serializer_class = SmsCodeSerializers
 
     def list(self, request, *args, **kwargs):
@@ -48,7 +48,7 @@ class LoginSerializers(serializers.ModelSerializer):
     v_code = serializers.CharField(required=True, validators=[RegexValidator(r"\d{4}", message="格式错误")])
 
     class Meta:
-        model = User
+        model = models.User
         fields = ['mobile', 'v_code']
         extra_kwargs = {
             "mobile": {
@@ -59,7 +59,7 @@ class LoginSerializers(serializers.ModelSerializer):
                         code='-1'
                     )
                 ]
-            },
+            }
         }
 
     def validate_v_code(self, value):
@@ -78,10 +78,20 @@ class LoginSerializers(serializers.ModelSerializer):
 
 
 class LoginView(ModelViewSet):
-    queryset = User.objects.all()
+    queryset = models.User.objects.all()
     serializer_class = LoginSerializers
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         print(serializer.validated_data)
+        instance = models.User.objects.filter(mobile=serializer.validated_data['mobile']).first()
+        if not instance:
+            serializer.validated_data.pop('v_code')
+            self.perform_create(serializer)
+            return Response({'token':"7777777"})
+        return Response({'token':"7777777"})
+
+    def perform_create(self, serializer):
+        serializer.save()
+
