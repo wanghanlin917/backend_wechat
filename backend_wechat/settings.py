@@ -139,5 +139,5 @@ CACHES = {
 REST_FRAMEWORK = {
     'UNAUTHENTICATED_USER': None,
     "UNAUTHENTICATED_TOKEN": None,
-    "EXCEPTION_HANDLER": "utils.handlers.exception_handler"
+    "EXCEPTION_HANDLER": "utils.handlers.exception_handler",
 }

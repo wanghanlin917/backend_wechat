@@ -8,7 +8,8 @@ from api import models
 import random
 
 from utils.viewset import GenericViewSet, ModelViewSet
-
+from utils.ext.auth import JwtAuthentication, JwtParamAuthentication, DenyAuthentication
+from utils.jwt_auth import create_token
 from rest_framework.mixins import RetrieveModelMixin, CreateModelMixin
 from utils.SendSMS import SendSMS
 
@@ -88,10 +89,23 @@ class LoginView(ModelViewSet):
         instance = models.User.objects.filter(mobile=serializer.validated_data['mobile']).first()
         if not instance:
             serializer.validated_data.pop('v_code')
-            self.perform_create(serializer)
-            return Response({'token':"7777777"})
-        return Response({'token':"7777777"})
+            instance = self.perform_create(serializer)
+        token = create_token({"user_id": instance.id, "mobile": instance.mobile})
+        # print("token", token)
+        return Response({'token': token})
 
     def perform_create(self, serializer):
-        serializer.save()
+        instance = serializer.save()
+        return instance
 
+
+class UserInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.User
+        fields = "__all__"
+
+
+class UserInfoView(ModelViewSet):
+    authentication_classes = [JwtAuthentication, JwtParamAuthentication, DenyAuthentication]
+    queryset = models.User.objects.all()
+    serializer_class = UserInfoSerializer
