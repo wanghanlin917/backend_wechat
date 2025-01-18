@@ -10,5 +10,5 @@ class News(models.Model):
 class User(models.Model):
     avatar = models.CharField(verbose_name="头像", max_length=128,default="")
     mobile = models.CharField(verbose_name="电话号码",max_length=11)
-    nicName = models.CharField(verbose_name="用户名", max_length=128,default="")
+    nickName = models.CharField(verbose_name="用户名", max_length=128,default="")
 

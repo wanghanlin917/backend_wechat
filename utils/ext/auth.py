@@ -23,7 +23,7 @@ class JwtAuthentication(BaseAuthentication):
         if not status:
             # return Response({"code": 401, "message": info_or_error, "data": {"username": "", "roles": ""}})
             raise exceptions.AuthenticationFailed(
-                {"code": 401, "message": info_or_error, "data": {"username": "", "roles": ""}})
+                {"code": 401, "data": {"message": [info_or_error,], "username": "", "roles": ""}})
         # 4.校验成功，继续向后 request.user, request.auth
         return (info_or_error, authorization)
         # return (1,2)

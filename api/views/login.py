@@ -4,9 +4,11 @@ from rest_framework import exceptions
 
 from django.core.validators import RegexValidator
 from django_redis import get_redis_connection
+
 from api import models
 import random
 
+from utils.filter import MineFilterBackend
 from utils.viewset import GenericViewSet, ModelViewSet
 from utils.ext.auth import JwtAuthentication, JwtParamAuthentication, DenyAuthentication
 from utils.jwt_auth import create_token
@@ -103,9 +105,13 @@ class UserInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.User
         fields = "__all__"
+        extra_kwargs = {'avatar': {'read_only': True}, 'mobile': {'read_only': True}}
+
+
 
 
 class UserInfoView(ModelViewSet):
     authentication_classes = [JwtAuthentication, JwtParamAuthentication, DenyAuthentication]
+    filter_backends = [MineFilterBackend, ]
     queryset = models.User.objects.all()
     serializer_class = UserInfoSerializer
