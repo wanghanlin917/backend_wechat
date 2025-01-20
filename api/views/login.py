@@ -1,12 +1,16 @@
 from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework import exceptions
+from rest_framework.decorators import action
 
 from django.core.validators import RegexValidator
 from django_redis import get_redis_connection
 
 from api import models
 import random
+import os
+from django.conf import settings
+from django.core.files.storage import default_storage
 
 from utils.filter import MineFilterBackend
 from utils.viewset import GenericViewSet, ModelViewSet
@@ -107,7 +111,12 @@ class UserInfoSerializer(serializers.ModelSerializer):
         fields = "__all__"
         extra_kwargs = {'avatar': {'read_only': True}, 'mobile': {'read_only': True}}
 
+    def get_avatar(self, obj):
+        print('ddd', self.context['request'].build_absolute_uri(obj.avatar))
+        return self.context['request'].build_absolute_uri(obj.avatar)
 
+
+from rest_framework.mixins import CreateModelMixin, ListModelMixin, UpdateModelMixin, RetrieveModelMixin
 
 
 class UserInfoView(ModelViewSet):
@@ -115,3 +124,32 @@ class UserInfoView(ModelViewSet):
     filter_backends = [MineFilterBackend, ]
     queryset = models.User.objects.all()
     serializer_class = UserInfoSerializer
+
+    @action(detail=False, methods=['post'], url_path="upload1")
+    def upload1(self, request):
+        # print(request.FILES.get('file'))
+        # print(request.FILES.get('file').name)
+        # print(request.user)
+        upload_object = request.FILES.get('file')
+        upload_url = get_upload_filename(upload_object.name)
+        save_path = default_storage.save(upload_url, upload_object)
+        local_url = default_storage.url(save_path)
+        abs_url = request.build_absolute_uri(local_url)
+        self.lookup_field = None
+        user = self.get_instance()
+        # user = self.filter_queryset(self.get_queryset())
+        # print(request.user)
+        # print('local_url', local_url)
+        # user = models.User.objects.filter(id=request.user.get('user_id')).first()
+        print("信息", user)
+        ser = self.get_serializer(user, data={"avatar": local_url}, partial=True)
+        print(ser)
+        ser.is_valid(raise_exception=True)
+        ser.save()
+        return Response({'url': abs_url})
+
+
+def get_upload_filename(filename):
+    upload_path = os.path.join(settings.UPLOAD_PATH, 'avatar')
+    file_path = os.path.join(upload_path, filename)
+    return default_storage.get_available_name(file_path)

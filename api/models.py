@@ -8,7 +8,7 @@ class News(models.Model):
     create_time = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
 class User(models.Model):
-    avatar = models.CharField(verbose_name="头像", max_length=128,default="")
+    avatar = models.CharField(verbose_name="头像", max_length=256,default="")
     mobile = models.CharField(verbose_name="电话号码",max_length=11)
     nickName = models.CharField(verbose_name="用户名", max_length=128,default="")
 
