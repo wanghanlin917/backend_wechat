@@ -106,13 +106,15 @@ class LoginView(ModelViewSet):
 
 
 class UserInfoSerializer(serializers.ModelSerializer):
+    avatar_url = serializers.SerializerMethodField()
+
     class Meta:
         model = models.User
         fields = "__all__"
-        extra_kwargs = {'avatar': {'read_only': True}, 'mobile': {'read_only': True}}
+        extra_kwargs = {'id':{'read_only': True},'avatar_url':{'read_only': True},'mobile':{'read_only': True}}
 
-    def get_avatar(self, obj):
-        print('ddd', self.context['request'].build_absolute_uri(obj.avatar))
+    def get_avatar_url(self, obj):
+        # print('ddd', self.context['request'].build_absolute_uri(obj.avatar))
         return self.context['request'].build_absolute_uri(obj.avatar)
 
 
@@ -136,17 +138,11 @@ class UserInfoView(ModelViewSet):
         local_url = default_storage.url(save_path)
         abs_url = request.build_absolute_uri(local_url)
         self.lookup_field = None
-        user = self.get_instance()
-        # user = self.filter_queryset(self.get_queryset())
-        # print(request.user)
-        # print('local_url', local_url)
-        # user = models.User.objects.filter(id=request.user.get('user_id')).first()
-        print("信息", user)
-        ser = self.get_serializer(user, data={"avatar": local_url}, partial=True)
-        print(ser)
-        ser.is_valid(raise_exception=True)
-        ser.save()
-        return Response({'url': abs_url})
+        instance = models.User.objects.filter(id=request.user.get('user_id')).first()
+        # print("信息", instance)
+        instance.avatar = local_url
+        instance.save()
+        return Response({'avatar_url': abs_url})
 
 
 def get_upload_filename(filename):
