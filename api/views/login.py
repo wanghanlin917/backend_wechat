@@ -147,12 +147,12 @@ class UserInfoView(ModelViewSet):
             instance.save()
             return Response({'avatar_url': abs_url})
         else:
-            print("正面",request.data)
+            print("正面", request.data)
             upload_url = get_upload_filename(upload_object.name, 'identify')
             save_path = default_storage.save(upload_url, upload_object)
             local_url = default_storage.url(save_path)
             abs_url = request.build_absolute_uri(local_url)
-            return Response({"url": abs_url})
+            return Response({"url": abs_url, "localUrl": local_url})
 
 
 def get_upload_filename(filename, folder="avatar"):
