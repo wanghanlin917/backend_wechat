@@ -4,7 +4,7 @@ from jwt import exceptions
 from django.conf import settings
 
 
-def create_token(payload, timeout=10):
+def create_token(payload, timeout=24):
     headers = {
         'type': 'jwt',
         'alg': 'HS256'
