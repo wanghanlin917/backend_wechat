@@ -111,7 +111,7 @@ class UserInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.User
         fields = "__all__"
-        extra_kwargs = {'id':{'read_only': True},'avatar_url':{'read_only': True},'mobile':{'read_only': True}}
+        extra_kwargs = {'id': {'read_only': True}, 'avatar_url': {'read_only': True}, 'mobile': {'read_only': True}}
 
     def get_avatar_url(self, obj):
         # print('ddd', self.context['request'].build_absolute_uri(obj.avatar))
@@ -127,25 +127,35 @@ class UserInfoView(ModelViewSet):
     queryset = models.User.objects.all()
     serializer_class = UserInfoSerializer
 
-    @action(detail=False, methods=['post'], url_path="upload1")
-    def upload1(self, request):
-        # print(request.FILES.get('file'))
-        # print(request.FILES.get('file').name)
-        # print(request.user)
+    @action(detail=False, methods=['post'], url_path="upload")
+    def upload(self, request):
+        print("image", request.data.get('type'))
+        type = request.data.get('type')
         upload_object = request.FILES.get('file')
-        upload_url = get_upload_filename(upload_object.name)
-        save_path = default_storage.save(upload_url, upload_object)
-        local_url = default_storage.url(save_path)
-        abs_url = request.build_absolute_uri(local_url)
-        self.lookup_field = None
-        instance = models.User.objects.filter(id=request.user.get('user_id')).first()
-        # print("信息", instance)
-        instance.avatar = local_url
-        instance.save()
-        return Response({'avatar_url': abs_url})
+        if type == "avatar":
+            # print(request.FILES.get('file'))
+            # print(request.FILES.get('file').name)
+            # print(request.user)
+            upload_url = get_upload_filename(upload_object.name)
+            save_path = default_storage.save(upload_url, upload_object)
+            local_url = default_storage.url(save_path)
+            abs_url = request.build_absolute_uri(local_url)
+            # self.lookup_field = None
+            instance = models.User.objects.filter(id=request.user.get('user_id')).first()
+            # print("信息", instance)
+            instance.avatar = local_url
+            instance.save()
+            return Response({'avatar_url': abs_url})
+        else:
+            print("正面", request.data)
+            upload_url = get_upload_filename(upload_object.name, 'identify')
+            save_path = default_storage.save(upload_url, upload_object)
+            local_url = default_storage.url(save_path)
+            abs_url = request.build_absolute_uri(local_url)
+            return Response({"url": abs_url, "localUrl": local_url})
 
 
-def get_upload_filename(filename):
-    upload_path = os.path.join(settings.UPLOAD_PATH, 'avatar')
+def get_upload_filename(filename, folder="avatar"):
+    upload_path = os.path.join(settings.UPLOAD_PATH, folder)
     file_path = os.path.join(upload_path, filename)
     return default_storage.get_available_name(file_path)
