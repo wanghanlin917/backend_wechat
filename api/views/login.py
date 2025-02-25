@@ -129,9 +129,17 @@ class UserInfoView(ModelViewSet):
 
     @action(detail=False, methods=['post'], url_path="upload")
     def upload(self, request):
+<<<<<<< HEAD
         print("image", request.data.get('type'))
         type = request.data.get('type')
         upload_object = request.FILES.get('file')
+=======
+        # print("image", request.data.get('type'))
+        # print(request.data)
+        type = request.data.get('type')
+        upload_object = request.FILES.get('file')
+        print(type, upload_object)
+>>>>>>> d24a249081f114c005a24e28749ab7f51535e7bb
         if type == "avatar":
             # print(request.FILES.get('file'))
             # print(request.FILES.get('file').name)
@@ -146,8 +154,21 @@ class UserInfoView(ModelViewSet):
             instance.avatar = local_url
             instance.save()
             return Response({'avatar_url': abs_url})
+<<<<<<< HEAD
         else:
             print("正面", request.data)
+=======
+        elif type == "repairImg":
+            upload_url = get_upload_filename(upload_object.name, "repairImg")
+            save_path = default_storage.save(upload_url, upload_object)
+            local_url = default_storage.url(save_path)
+            abs_url = request.build_absolute_uri(local_url)
+            # instance = models.RepairImg.objects.create(url=local_url)
+            return Response({"url": abs_url, "localUrl": local_url})
+        else:
+            # print(type(request.data))
+            # print("data",upload_object)
+>>>>>>> d24a249081f114c005a24e28749ab7f51535e7bb
             upload_url = get_upload_filename(upload_object.name, 'identify')
             save_path = default_storage.save(upload_url, upload_object)
             local_url = default_storage.url(save_path)
